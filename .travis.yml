@@ -4,27 +4,22 @@ services:
 language: go
 matrix:
   include:
-  #Go
   - name: Moby
     env: URL="https://github.com/moby/moby" NAME="moby.ident"
   - name: Go-Git
     env: URL="https://github.com/src-d/go-git" NAME="gogit.ident"
   - name: Kubernetes
     env: URL="https://github.com/kubernetes/kubernetes" NAME="kubernetes.ident"
-  #JS
   - name: Vue
     env: URL="https://github.com/vuejs/vue" NAME="vue.ident"
   - name: React
     env: URL="https://github.com/facebook/react" NAME="react.ident"
   - name: D3
     env: URL="https://github.com/d3/d3" NAME="d3.ident"
-  #Java
   - name: String boot
     env: URL="https://github.com/spring-projects/spring-boot" NAME="springboot.ident"
-  #Ruby (may not work!)
   - name: Rails
     env: URL="https://github.com/rails/rails" NAME="rails.ident"
-  #PHP
   - name: Laravel
     env: URL="https://github.com/laravel/laravel" NAME="laravel.ident"
   - name: Symfony
@@ -33,14 +28,12 @@ matrix:
     env: URL="https://github.com/bcit-ci/CodeIgniter" NAME="codeigniter.ident"
   - name: Composer
     env: URL="https://github.com/composer/composer" NAME="composer.ident"
-  #Pyhon
   - name: Flask
     env: URL="https://github.com/pallets/flask" NAME="flask.ident"
   - name: Django
     env: URL="https://github.com/django/django" NAME="django.ident"
   - name: Ansible
     env: URL="https://github.com/ansible/ansible" NAME="ansible.ident"
-
 before_install:
 - |
   if [[ $TRAVIS_OS_NAME = linux ]]; then
@@ -51,7 +44,8 @@ before_install:
     sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-6 90
   fi
 - go get -u gopkg.in/bblfsh/client-go.v2/...
-- docker run -d --name bblfshd --privileged -p 9432:9432 -v /var/lib/bblfshd:/var/lib/bblfshd bblfsh/bblfshd
+- docker run -d --name bblfshd --privileged -p 9432:9432 -v /var/lib/bblfshd:/var/lib/bblfshd
+  bblfsh/bblfshd
 - docker exec -it bblfshd bblfshctl driver install bblfsh/python-driver
 - docker exec -it bblfshd bblfshctl driver install bblfsh/java-driver
 - docker exec -it bblfshd bblfshctl driver install bblfsh/go-driver
@@ -61,13 +55,13 @@ before_install:
 script:
 - go run *.go $URL $NAME
 - mkdir release
-- cat $NAME | wc -l 
+- cat $NAME | wc -l
 - if [[ "$(cat $NAME | wc -l )" != "0" ]]; then mv $NAME release/ && echo moved $NAME; fi
 deploy:
   provider: s3
   access_key_id: AKIAJJAWMVOKCRWRR5MQ
   secret_access_key:
-    secure: LFy7aQoph3AoYiUrIKuTQph8T+9VA89SPcqCCc8GtBeZG0b8h/TuXOKI2xlOBdRlEa6mxE0+8Pf39zPI6QfzFLo6Aeg0ZtDjz53UUyKX3z6wtkyND0GWkcF33wmEoihecUJdssQBwyAdSM7Vhf+l/Ie5a0E9Rtfe/uGj5EBkr2ya324C57qYY2r0yaW+XDKgqFhpKEel+npG+pWpQw2uO9U3g2WsVoJWFeVuYfjIOXp96SzWSdjL3hKLXdupSpVb2p0uVNyOPFb/jtO1mBJvaMmwaDFT+H6imYpZ7B/DXQ6VAgeMa/cpchZG4Rwwd0Xr04x7iHsjxHSiP7MfESO4tynOuoo2FI5bbEQnLcOjy0geLQX3SLHgTFL66KdfY7ZcJYjbFfJEgJ00cwAwgTIVfoaJ/eClpHQFjrAQVMVCDkMfAllLsVGEeqJM3TbKJwVKdWhYQ6HwxZiowRjcT6FSBEwilHk9ewDGecOer0Z95G23W8LMPI2CYspA+3ULe2F09CrQ8WmN8wuPLkFGgoxP++RgIjJ8pTT7NnO8rCRItnLqq7k2K2mA2+h8jaurs2Zket1vXm2+a5Jfm2jrFRwR/ZuQOvoIH77hjxRXbZfPRM7NloHEFF1y+3fsPcEyhLPLHPS189Lq4o8NLBi/zIL5vMZGB0lO1Wi5OW6yf8xH+Fs=
+    secure: bJcMqraNzjVxiemj2iETD2Oy1TzjGeDsJmoB9l4P0lBmoEkhe121nnJyPzr566nfIH0CWwnn4zfPJBN33gc8QWco6NCWxD3yehD7eoBuYygqWNnDlY/aaL6h6pG7s7j6BJFWPl8FQqegb/38oAJZfeWuXubJYKRgj6trJ8hXEXXTfX4XtxYGJJmAICcXL6foRrydRNf18P95TvGhCv9gxR+tUiBq/d6RTVm1twwasn63DrKJY2GypUVFtR0Yh4g6EvVfgrUuqSlTIWpT+PXIwtokFJ+7yUwVu0LZBttAFj737WmyCX1xXZtPEST23LLwwg3IR9Sio9OsbgPCUvEiTDz8awe5wqbJnOMCUslWsTcua8DX6CFk/+fxWpXNgV0menX4pzqseLiYCEqFgP4dUAb/YsmP0VI5VmjRAhwaYse6JHMMdqTgTpKlYr1PeKl1TRDPGFmjp/6LOd++JU3c8DC+hH8NCIh54QC0OqRtLMffMgt/bX8bICmhCY3J15cO21TRBW12bgJ6GX0QfP7u0YdG3vxWW3QCzT3wfk8lCwot8GPU4nVNTltCXKjCCFmNk4JJkoqs5v+fQnAID453reOn0KdABPWCTsj5ms/hLilJqsLCFdJkwHdrMncJl9neEYhLjK83Tqht+/Fo8PsvS0uMdJnZZU35SHbi5H39eHw=
   bucket: fetch-identifiers
   skip_cleanup: true
   acl: public_read
